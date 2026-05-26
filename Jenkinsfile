@@ -122,3 +122,4 @@ spec:
       echo "Pipeline finalizado — SHOULD_BUILD: ${env.SHOULD_BUILD}"
     }
   }
+}
