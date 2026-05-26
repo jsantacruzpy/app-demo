@@ -34,13 +34,13 @@ spec:
     stage('Build & Push') {
       steps {
         container('kaniko') {
-          sh """
-            /kaniko/executor \
-              --context=dir://workspace \
-              --dockerfile=Dockerfile \
-              --destination=${IMAGE}:${TAG} \
-              --destination=${IMAGE}:latest
-          """
+		  sh """
+			/kaniko/executor \
+			  --context=dir://${env.WORKSPACE} \
+			  --dockerfile=${env.WORKSPACE}/Dockerfile \
+			  --destination=${IMAGE}:${TAG} \
+			  --destination=${IMAGE}:latest
+		  """
         }
       }
     }
