@@ -39,7 +39,10 @@ spec:
   steps {
     container('git') {
       script {
-
+        // Fix de permisos: git no confía en directorios
+        // con owner diferente al usuario actual del contenedor
+        sh "git config --global --add safe.directory ${env.WORKSPACE}"
+        
         // Verificar si existe historial suficiente para comparar
         // En el primer build o con shallow clone HEAD~1 no existe
         def commitCount = sh(
