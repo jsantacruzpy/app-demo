@@ -118,8 +118,7 @@ spec:
     failure {
       echo "Pipeline fallido — revisar logs"
     }
-    skipped {
-      echo "Build omitido — sin cambios en la app"
+    always {
+      echo "Pipeline finalizado — SHOULD_BUILD: ${env.SHOULD_BUILD}"
     }
   }
-}
