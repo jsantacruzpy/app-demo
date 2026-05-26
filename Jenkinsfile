@@ -35,34 +35,45 @@ spec:
 
     // Detectar si hubo cambios en archivos relevantes de la app
     // Compara el commit actual contra el anterior
-    stage('Check Changes') {
-      steps {
-        container('git') {
-          script {
-            def changes = sh(
-              // Lista archivos modificados entre el commit anterior y el actual
-              // HEAD~1 es el commit anterior, HEAD es el actual
-              script: "git diff --name-only HEAD~1 HEAD",
-              returnStdout: true
-            ).trim()
+   stage('Check Changes') {
+  steps {
+    container('git') {
+      script {
 
-            echo "Archivos modificados: ${changes}"
+        // Verificar si existe historial suficiente para comparar
+        // En el primer build o con shallow clone HEAD~1 no existe
+        def commitCount = sh(
+          script: "git rev-list --count HEAD",
+          returnStdout: true
+        ).trim().toInteger()
 
-            // Si cambió Dockerfile, index.html o cualquier archivo de src/
-            // marcamos que hay que buildear
-            if (changes.contains('Dockerfile') ||
-                changes.contains('index.html') ||
-                changes.contains('src/')) {
-              env.SHOULD_BUILD = 'true'
-              echo "Cambios detectados en la app — se va a buildear"
-            } else {
-              env.SHOULD_BUILD = 'false'
-              echo "Sin cambios en la app — se omite el build"
-            }
+        if (commitCount < 2) {
+          // Primer commit o sin historial — buildear siempre
+          echo "Primer build o historial insuficiente — forzando build"
+          env.SHOULD_BUILD = 'true'
+        } else {
+          // Comparar archivos modificados entre commits
+          def changes = sh(
+            script: "git diff --name-only HEAD~1 HEAD",
+            returnStdout: true
+          ).trim()
+
+          echo "Archivos modificados: ${changes}"
+
+          if (changes.contains('Dockerfile') ||
+              changes.contains('index.html') ||
+              changes.contains('src/')) {
+            env.SHOULD_BUILD = 'true'
+            echo "Cambios detectados — se procedera con el build"
+          } else {
+            env.SHOULD_BUILD = 'false'
+            echo "Sin cambios en la app — se omiten build y push"
           }
         }
       }
     }
+  }
+}
 
     // Solo ejecuta si SHOULD_BUILD es true
     stage('Build & Push') {
