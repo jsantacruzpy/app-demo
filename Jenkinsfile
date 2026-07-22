@@ -10,15 +10,15 @@ spec:
     image: gcr.io/kaniko-project/executor:debug
     command: ['sleep', '9999']
     volumeMounts:
-    - name: dockerhub-secret
+    - name: harbor-secret
       mountPath: /kaniko/.docker
   - name: git
     image: alpine/git
     command: ['sleep', '9999']
   volumes:
-  - name: dockerhub-secret
+  - name: harbor-secret
     secret:
-      secretName: dockerhub-secret
+      secretName: harbor-secret
       items:
       - key: .dockerconfigjson
         path: config.json
@@ -27,7 +27,7 @@ spec:
   }
 
   environment {
-    IMAGE = "jsantacruzpy/app-demo"
+    IMAGE = "harbor.lab.local/cicd/app-demo"
     TAG   = "${env.BUILD_NUMBER}"
   }
 
